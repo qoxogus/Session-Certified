@@ -36,111 +36,21 @@ router.post('/login_process', function(request, response) {
     //success!
     request.session.is_logined = true;            //인증에 성공한다면 로그인 확인정보와 이름정보를 세션에 저장
     request.session.nickname = authData.nickname;
-    response.redirect(`/`);
+    request.session.save(function() {
+      response.redirect(`/`);
+    }); //session store에 저장하는 작업을 바로 시작함 (느려졌을때 바로 리다이렉션하여 무한로그인 방지)
+    
   } else {
     response.send('Who?');
   }
     
 });
 
-
-/*
-router.get('/create', function(request, response){ // /topic/:pageId보다 먼저 실행함으로써 topic을 예약어로 쓰일수있음 (실행순서 중요해짐)
-    var title = 'WEB - create';
-    var list = template.list(request.list);
-    var html = template.HTML(title, list, `
-      <form action="/topic/create_process" method="post">
-        <p><input type="text" name="title" placeholder="title"></p>
-        <p>
-          <textarea name="description" placeholder="description"></textarea>
-        </p>
-        <p>
-          <input type="submit">
-        </p>
-      </form>
-    `, '');
-    response.send(html);
-});
-  
-router.post('/create_process', function(request, response) {
-  // console.log(request.list);  //불러오지 못함 <undefined> (post라서)  13line 참조
-  var post = request.body;
-  var title = post.title;
-  var description = post.description;
-  fs.writeFile(`data/${title}`, description, 'utf8', function(err){
-    response.redirect(`/topic/${title}`);
+router.get('/logout', function(request, response){ 
+  request.session.destroy(function(err) { //세션 삭제를 위해 destroy를 사용한다. / destroy는 콜백을 받는다. 세션삭제가 완료된 후 호출되도록 약속되어있다 / err를 인자로 받는다
+    response.redirect('/');  
   })
-});
-  
-router.get('/update/:pageId', function(request, response) {
-  var filteredId = path.parse(request.params.pageId).base;
-  fs.readFile(`data/${filteredId}`, 'utf8', function(err, description){
-    var title = request.params.pageId;
-    var list = template.list(request.list);
-    var html = template.HTML(title, list,
-      `
-      <form action="/topic/update_process" method="post">
-        <input type="hidden" name="id" value="${title}">
-        <p><input type="text" name="title" placeholder="title" value="${title}"></p>
-        <p>
-          <textarea name="description" placeholder="description">${description}</textarea>
-        </p>
-        <p>
-          <input type="submit">
-        </p>
-      </form>
-      `,
-      `<a href="/topic/create">create</a> <a href="/topic/update/${title}">update</a>`
-    );
-    response.send(html);
-  });
-});
-  
-router.post('/update_process', function(request, response) {
-  var post = request.body;
-  var id = post.id;
-  var title = post.title;
-  var description = post.description;
-  fs.rename(`data/${id}`, `data/${title}`, function(error){
-    fs.writeFile(`data/${title}`, description, 'utf8', function(err){
-      response.redirect(`/topic/${title}`)
-    })
-  });
-});
-  
-router.post('/delete_process', function(request, response){
-  var post = request.body;
-  var id = post.id;
-  var filteredId = path.parse(id).base;
-  fs.unlink(`data/${filteredId}`, function(error){
-    response.redirect('/');
-  });
-});
-  
-router.get('/:pageId', function(request, response, next) { // url = page/HTML      pageId = HTML
-    var filteredId = path.parse(request.params.pageId).base;
-    fs.readFile(`data/${filteredId}`, 'utf8', function(err, description){
-      if(err) {
-        next(err); //아무 값도 주지않으면 다음 미들웨어 호출/ /route라면 미들웨어중에서 같은 인자가 아닌것 3개 넘기는것/ /그 외엔 err로 약속 (err를 던진다)
-      } else {
-        var title = request.params.pageId;
-        var sanitizedTitle = sanitizeHtml(title);
-        var sanitizedDescription = sanitizeHtml(description, {
-          allowedTags:['h1']
-        });
-        var list = template.list(request.list);
-        var html = template.HTML(sanitizedTitle, list,
-          `<h2>${sanitizedTitle}</h2>${sanitizedDescription}`,
-          ` <a href="/topic/create">create</a>
-            <a href="/topic/update/${sanitizedTitle}">update</a>
-            <form action="/topic/delete_process" method="post">
-              <input type="hidden" name="id" value="${sanitizedTitle}">
-              <input type="submit" value="delete">
-            </form>`
-        );
-        response.send(html);
-      }
-    });
-});
-*/
+ }); //원래 세션은 지워지고 새로운 세션울 발급하며 완전히 새로운 사람으로 인식한다
+
+
 module.exports = router;
