@@ -6,8 +6,6 @@ var compression = require('compression');
 var helmet = require('helmet') //보안관련
 app.use(helmet());
 
-var indexRouter = require('./routes/index');
-var topicRouter = require('./routes/topic');
 
 
 app.use(express.static('public'));
@@ -20,9 +18,13 @@ app.get('*', function(request, response, next){ //next에 middleware가 담겨�
   });
 });
 
+var indexRouter = require('./routes/index');
+var topicRouter = require('./routes/topic');
+var authRouter = require('./routes/auth');
 
 app.use('/', indexRouter);
 app.use('/topic', topicRouter); // /topic 이므로 topic.js에서는 /topic을 빼야한다
+app.use('/auth', authRouter);
 
 
 //미들웨어는 순차적으로 실행이 된다 그러므로 404에러처리 미들웨어는 가장 마지막에 위치한다.
