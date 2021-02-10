@@ -5,6 +5,8 @@ var fs = require('fs');
 var sanitizeHtml = require('sanitize-html');
 var template = require('../lib/template.js');
 
+//session에는 사용자가 로그인을 했는지를 알려줄수있는 정보, 페이지에 접근할때마다 사용자에 필요한 정보 ex)닉네임, 세션에 담아두면 DB나 파일에 다시 접근 할 필요가 없어서 효율적이다
+
 var authData = { //실제론 이렇게 사용하시면 안됩니다. 연습용코드입니다.
   email:'qoxogus0809@gmail.com',
   password:'111111',  
@@ -32,11 +34,13 @@ router.post('/login_process', function(request, response) {
   var password = post.pwd;
   if(email === authData.email && password === authData.password) {
     //success!
-    response.send('Welcome!');
+    request.session.is_logined = true;            //인증에 성공한다면 로그인 확인정보와 이름정보를 세션에 저장
+    request.session.nickname = authData.nickname;
+    response.redirect(`/`);
   } else {
     response.send('Who?');
   }
-    // response.redirect(`/topic/${title}`);
+    
 });
 
 

@@ -5,12 +5,20 @@ var bodyParser = require('body-parser');
 var compression = require('compression');
 var helmet = require('helmet') //보안관련
 app.use(helmet());
-
+var session = require('express-session')
+var FileStore = require('session-file-store')(session)// 실제론 데이터베이스나 캐싱데이터베이스에 저장하는게 바람직하다.
 
 
 app.use(express.static('public'));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(compression()); //압축
+app.use(session({
+  secret: 'asdfasdf',
+  resave: false,
+  saveUninitialized: true,
+  store: new FileStore()
+}))
+
 app.get('*', function(request, response, next){ //next에 middleware가 담겨있다고 생각    불필요한 불러오기를 방지하기 위해 get을 사용(post방식 등에서 방지)   '*' = 들어오는 모든 요청    (들어오는 모든요청이 아닌 get방식으로 들어오는 요청에 대해서만 파일리스트를 가져오는 코드)
   fs.readdir('./data', function(error, filelist) {
     request.list = filelist;
