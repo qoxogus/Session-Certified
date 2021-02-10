@@ -4,6 +4,7 @@ var path = require('path');
 var fs = require('fs');
 var sanitizeHtml = require('sanitize-html');
 var template = require('../lib/template.js');
+var auth = require('../lib/auth');
 
 router.get('/create', function(request, response){ // /topic/:pageId보다 먼저 실행함으로써 topic을 예약어로 쓰일수있음 (실행순서 중요해짐)
     var title = 'WEB - create';
@@ -18,7 +19,7 @@ router.get('/create', function(request, response){ // /topic/:pageId보다 먼�
           <input type="submit">
         </p>
       </form>
-    `, '');
+    `, '', auth.statusUI(request, response));
     response.send(html);
 });
   
@@ -50,7 +51,7 @@ router.get('/update/:pageId', function(request, response) {
         </p>
       </form>
       `,
-      `<a href="/topic/create">create</a> <a href="/topic/update/${title}">update</a>`
+      `<a href="/topic/create">create</a> <a href="/topic/update/${title}">update</a>`, auth.statusUI(request, response)
     );
     response.send(html);
   });
@@ -97,6 +98,7 @@ router.get('/:pageId', function(request, response, next) { // url = page/HTML   
               <input type="hidden" name="id" value="${sanitizedTitle}">
               <input type="submit" value="delete">
             </form>`
+            ,auth.statusUI(request, response)
         );
         response.send(html);
       }
