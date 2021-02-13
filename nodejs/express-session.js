@@ -15,7 +15,7 @@ app.use(session({
                             //session미들웨어는 req객체의 프로퍼티로 session 객체를 추가해주는구나
 
 app.get('/', function (req, res, next) {
-    console.log(req.session); 
+    console.log(req.session); //객체상태
     if(req.session.num === undefined) {
         req.session.num = 1;
     } else {
